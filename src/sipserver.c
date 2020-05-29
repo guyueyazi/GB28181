@@ -102,6 +102,8 @@ int register_handle(eXosip_event_t *evtp)
         SIP_STRDUP(nonce);
         SIP_STRDUP(nonce_count);
         SIP_STRDUP(uri);
+        LOGI("realm: %s", realm);
+        LOGI("nonce: %s", nonce);
         LOGI("username: %s", username);
         LOGI("uri: %s", uri);
         LOGI("algorithm: %s", algorithm);
