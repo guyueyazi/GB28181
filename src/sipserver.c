@@ -153,6 +153,7 @@ static int cmd_callstart()
     char *s;
     size_t len;
 
+    LOGI("ip:%s", ip);
     sprintf(from, "sip:%s@%s:%d", SIP_ID, ip, PORT);
     sprintf(contact, "sip:%s@%s:%d", SIP_ID, ip, PORT);
     sprintf(to, "sip:%s@%s:%d", app.user_id, app.user_ip, app.user_port);
