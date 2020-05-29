@@ -1,3 +1,4 @@
+#include <ifaddrs.h>
 #include "public.h"
 #include "osip2/osip_mt.h"
 #include "eXosip2/eXosip.h"
@@ -10,12 +11,20 @@
 #define UAS_VERSION "SipUASv0.1"
 #define SIP_ID      "34020000002000000001"
 #define PASSWD      "123456"
+#define TIMEOUT     1800
+#define RTP_PORT    6000
 
 typedef struct {
     struct eXosip_t *ctx;
     pthread_t tid;
     int running;
+    int callid;
+    char user_id[64];
+    char user_ip[64];
+    int user_port;
 } app_t;
+
+static app_t app;
 
 void show_info()
 {
@@ -28,7 +37,42 @@ void show_info()
     printf("--- transport: \tudp\n");
 }
 
-static app_t app;
+const char* get_ip(void)
+{
+    struct ifaddrs *ifaddr, *ifa;
+    int family, s;
+    char *host = NULL;
+
+    if (getifaddrs(&ifaddr) == -1) {
+        perror("getifaddrs");
+        return NULL;
+    }
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        family = ifa->ifa_addr->sa_family;
+
+        if (!strcmp(ifa->ifa_name, "lo"))
+            continue;
+        if (family == AF_INET) {
+            if ((host = (char*)malloc(NI_MAXHOST)) == NULL)
+                return NULL;
+            s = getnameinfo(ifa->ifa_addr,
+                    (family == AF_INET) ? sizeof(struct sockaddr_in) :
+                    sizeof(struct sockaddr_in6),
+                    host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                return NULL;
+            }
+            freeifaddrs(ifaddr);
+            return host;
+        }
+    }
+    return NULL;
+}
+
 
 void dbg_dump_request(eXosip_event_t *evtp)
 {
@@ -95,16 +139,73 @@ static void auth_calc_response(char *username, char *uri, char *method, HASHHEX 
     memcpy(response, rresponse, HASHHEXLEN);
 }
 
+static int cmd_callstart()
+{
+	int ret = -1;
+	char session_exp[1024] = { 0 };
+	osip_message_t *msg = NULL;
+    const char *ip = get_ip();
+    char from[1024] = {0};
+    char to[1024] = {0};
+    char contact[1024] = {0};
+    char sdp[2048] = {0};
+	char head[1024] = {0};
+
+    sprintf(from, "sip:%s@%s:%d", SIP_ID, ip, PORT);
+    sprintf(contact, "sip:%s@%s:%d", SIP_ID, ip, PORT);
+    sprintf(to, "sip:%s@%s:%d", app.user_id, app.user_ip, app.user_port);
+    snprintf (sdp, 2048,
+            "v=0\r\n"
+            "o=%s 0 0 IN IP4 %s\r\n"
+            "s=Play\r\n"
+            "c=IN IP4 %s\r\n"
+            "t=0 0\r\n"
+            "m=video %d TCP/RTP/AVP 96 98 97\r\n"
+            "a=recvonly\r\n"
+            "a=rtpmap:96 PS/90000\r\n"
+            "a=rtpmap:98 H264/90000\r\n"
+            "a=rtpmap:97 MPEG4/90000\r\n"
+            "a=setup:passive\r\n"
+            "a=connection:new\r\n"
+            "y=0100000001\r\n"
+            "f=\r\n", SIP_ID, ip, ip, RTP_PORT);
+	ret = eXosip_call_build_initial_invite(app.ctx, &msg, to, from,  NULL, NULL);
+	if (ret) {
+		LOGE( "call build failed %s %s", from, to);
+		return -1;
+	}
+
+	snprintf(head, sizeof(head)-1, "<%s;lr>", "");
+	osip_list_special_free(&msg->routes, (void(*)(void*))osip_route_free);
+	osip_message_set_route(msg, head);
+    osip_message_set_body(msg, sdp, strlen(sdp));
+	osip_message_set_content_type(msg, "application/sdp");
+	snprintf(session_exp, sizeof(session_exp)-1, "%i;refresher=uac", TIMEOUT);
+	osip_message_set_header(msg, "Session-Expires", session_exp);
+	osip_message_set_supported(msg, "timer");
+	app.callid = eXosip_call_send_initial_invite(app.ctx, msg);
+	ret = (app.callid > 0) ? 0 : -1;
+	return ret;
+}
+
 int register_handle(eXosip_event_t *evtp)
 {
 #define SIP_STRDUP(field) if (ss_dst->field) field = osip_strdup_without_quote(ss_dst->field)
     char *method = NULL, *algorithm = NULL, *username = NULL, *realm = NULL, *nonce = NULL, *nonce_count = NULL, *uri = NULL;
     char calc_response[HASHHEXLEN];
     osip_authorization_t * ss_dst = NULL;
+    osip_contact_t *contact = NULL;
     HASHHEX HA1, HA2 = "", Response;
 
     osip_message_get_authorization(evtp->request, 0, &ss_dst);
     if (ss_dst) {
+        osip_message_get_contact (evtp->request, 0, &contact);
+        if (contact && contact->url) {
+            strcpy(app.user_ip, contact->url->host);
+            app.user_port = atoi(contact->url->port);
+        } else {
+            LOGE("get contact error");
+        }
         method = evtp->request->sip_method;
         SIP_STRDUP(algorithm);
         SIP_STRDUP(username);
@@ -112,6 +213,7 @@ int register_handle(eXosip_event_t *evtp)
         SIP_STRDUP(nonce);
         SIP_STRDUP(nonce_count);
         SIP_STRDUP(uri);
+        strcpy(app.user_id, username);
         LOGI("method: %s", method);
         LOGI("realm: %s", realm);
         LOGI("nonce: %s", nonce);
@@ -127,6 +229,10 @@ int register_handle(eXosip_event_t *evtp)
         if (!memcmp(calc_response, Response, HASHHEXLEN)) {
             register_response(evtp, 200);
             LOGI("register_success");
+            sleep(3);
+            LOGI("start call");
+            cmd_callstart();
+
         } else {
             register_response(evtp, 401);
             LOGI("register_failed");
@@ -144,6 +250,8 @@ int register_handle(eXosip_event_t *evtp)
 
     return 0;
 }
+
+
 
 int invite_ack_handle(eXosip_event_t *evtp)
 {
@@ -198,7 +306,20 @@ int sip_event_handle(eXosip_event_t *evtp)
                 invite_ack_handle(evtp);
             }
             break;
+        case EXOSIP_REGISTRATION_SUCCESS:
+            LOGI("EXOSIP_REGISTRATION_SUCCESS");
+            break;
+        case EXOSIP_REGISTRATION_FAILURE:
+            LOGI("EXOSIP_REGISTRATION_FAILURE");
+            break;
+        case EXOSIP_CALL_INVITE:
+            LOGI("EXOSIP_CALL_INVITE");
+            break;
+        default:
+            break;
     }
+
+    return 0;
 }
 
 static void * sip_eventloop_thread(void *arg)
@@ -216,6 +337,8 @@ static void * sip_eventloop_thread(void *arg)
         eXosip_automatic_action(app.ctx);
         sip_event_handle(evtp);
     }
+
+    return NULL;
 }
 
 int sipserver_init()
