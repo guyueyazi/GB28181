@@ -12,7 +12,7 @@
 #define SIP_ID      "34020000002000000001"
 #define PASSWD      "123456"
 #define TIMEOUT     1800
-#define RTP_PORT    6000
+#define RTP_PORT    18040
 
 typedef struct {
     struct eXosip_t *ctx;
