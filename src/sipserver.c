@@ -117,8 +117,7 @@ int register_handle(eXosip_event_t *evtp)
         osip_free(username);
         osip_free(realm);
         osip_free(nonce);
-        if (nonce_count)
-            osip_free(nonce_count);
+        osip_free(nonce_count);
         osip_free(uri);
     } else {
         LOGI("register 401_unauthorized");
