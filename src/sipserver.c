@@ -150,6 +150,8 @@ static int cmd_callstart()
     char contact[1024] = {0};
     char sdp[2048] = {0};
 	char head[1024] = {0};
+    char *s;
+    size_t len;
 
     sprintf(from, "sip:%s@%s:%d", SIP_ID, ip, PORT);
     sprintf(contact, "sip:%s@%s:%d", SIP_ID, ip, PORT);
@@ -184,7 +186,12 @@ static int cmd_callstart()
 	osip_message_set_header(msg, "Session-Expires", session_exp);
 	osip_message_set_supported(msg, "timer");
 	app.callid = eXosip_call_send_initial_invite(app.ctx, msg);
+    osip_message_to_str(msg, &s, &len);
+    printf("%s", s);
 	ret = (app.callid > 0) ? 0 : -1;
+    if (ret) {
+        LOGE("send invite error");
+    }
 	return ret;
 }
 
