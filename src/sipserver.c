@@ -237,9 +237,9 @@ int register_handle(eXosip_event_t *evtp)
         if (!memcmp(calc_response, Response, HASHHEXLEN)) {
             register_response(evtp, 200);
             LOGI("register_success");
-            sleep(3);
-            LOGI("start call");
-            cmd_callstart();
+            //sleep(3);
+            //LOGI("start call");
+            //cmd_callstart();
 
         } else {
             register_response(evtp, 401);
@@ -414,6 +414,8 @@ int main()
     app.running = 1;
     if (sipserver_init())
         return 0;
+    sleep(5);
+    cmd_callstart();
     while(app.running) 
         sleep(3);
 
