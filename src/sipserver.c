@@ -8,7 +8,7 @@
 #define NONCE       "1234567890123456"
 #define EXPIRY      3600
 #define PORT        5060
-#define UAS_VERSION "SipUASv0.1"
+#define UAS_VERSION "SipUAv0.1"//"SipUASv0.1"
 #define SIP_ID      "34020000002000000001"
 #define PASSWD      "123456"
 #define TIMEOUT     1800
@@ -174,7 +174,7 @@ static int cmd_callstart()
             "f=\r\n", SIP_ID, ip, ip, RTP_PORT);
 	ret = eXosip_call_build_initial_invite(app.ctx, &msg, to, from,  NULL, NULL);
 	if (ret) {
-		LOGE( "call build failed %s %s", from, to);
+		LOGE( "call build failed %s %s ret:%d", from, to, ret);
 		return -1;
 	}
 
@@ -308,8 +308,8 @@ int sip_event_handle(eXosip_event_t *evtp)
             }
             break;
         case EXOSIP_CALL_ANSWERED:
-            dbg_dump_response(evtp);
             LOGI("EXOSIP_CALL_ANSWERED");
+            dbg_dump_response(evtp);
             if (evtp->response) {
                 invite_ack_handle(evtp);
             }
@@ -357,6 +357,7 @@ int sip_event_handle(eXosip_event_t *evtp)
             LOGI("msg type: %d", evtp->type);
             break;
     }
+    eXosip_event_free(evtp);
 
     return 0;
 }
