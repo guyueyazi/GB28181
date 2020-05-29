@@ -106,7 +106,7 @@ int register_handle(eXosip_event_t *evtp)
         LOGI("realm: %s", realm);
         LOGI("nonce: %s", nonce);
         LOGI("nonce_count: %s", nonce_count);
-        LOGI("message_gop: %s", ss_dst->message_gop);
+        LOGI("message_gop: %s", ss_dst->message_qop);
         LOGI("username: %s", username);
         LOGI("uri: %s", uri);
         LOGI("algorithm: %s", algorithm);
