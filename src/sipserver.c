@@ -60,6 +60,31 @@ static void register_response(eXosip_event_t *evtp, int code)
     }
 }
 
+static void register_401unauthorized_response(eXosip_event_t *evtp)
+{
+    int ret = 0;
+    char *dest = NULL;
+    osip_message_t * reg = NULL;
+    osip_www_authenticate_t * header = NULL;
+
+    osip_www_authenticate_init(&header);
+    osip_www_authenticate_set_auth_type (header, osip_strdup("Digest"));
+    osip_www_authenticate_set_realm(header,osip_enquote(core->realm));
+    osip_www_authenticate_set_nonce(header,osip_enquote(core->nonce));
+    osip_www_authenticate_to_str(header, &dest);
+    ret = eXosip_message_build_answer (app.ctx, evtp->tid, 401, &reg);
+    if ( ret == 0 && reg != NULL ) {
+        osip_message_set_www_authenticate(reg, dest);
+        osip_message_set_content_type(reg, "Application/MANSCDP+xml");
+        eXosip_lock(app.ctx);
+        eXosip_message_send_answer (app.ctx, evtp->tid, 401, reg);
+        eXosip_unlock(app.ctx);
+    }
+
+    osip_www_authenticate_free(header);
+    osip_free(dest);
+}
+
 int register_handle(eXosip_event_t *evtp)
 {
 #define SIP_STRDUP(field) if (ss_dst->field) field = osip_strdup_without_quote(ss_dst->field)
@@ -69,29 +94,36 @@ int register_handle(eXosip_event_t *evtp)
     HASHHEX HA1, HA2 = "", Response;
 
     osip_message_get_authorization(evtp->request, 0, &ss_dst);
-    method = evtp->request->sip_method;
-    SIP_STRDUP(algorithm);
-    SIP_STRDUP(username);
-    SIP_STRDUP(realm);
-    SIP_STRDUP(nonce);
-    SIP_STRDUP(nonce_count);
-    SIP_STRDUP(uri);
-    LOGI("username: %s", username);
-    DigestCalcHA1(algorithm, username, realm, PASSWD, nonce, nonce_count, HA1);
-    DigestCalcResponse(HA1, nonce, nonce_count, ss_dst->cnonce, ss_dst->message_qop, 0, method, uri, HA2, Response);
-    if (!memcmp(calc_response, Response, HASHHEXLEN)) {
-        register_response(evtp, 200);
-        LOGI("register_success");
+    if (ss_dst) {
+        method = evtp->request->sip_method;
+        SIP_STRDUP(algorithm);
+        SIP_STRDUP(username);
+        SIP_STRDUP(realm);
+        SIP_STRDUP(nonce);
+        SIP_STRDUP(nonce_count);
+        SIP_STRDUP(uri);
+        LOGI("username: %s", username);
+        DigestCalcHA1(algorithm, username, realm, PASSWD, nonce, nonce_count, HA1);
+        DigestCalcResponse(HA1, nonce, nonce_count, ss_dst->cnonce, ss_dst->message_qop, 0, method, uri, HA2, Response);
+        if (!memcmp(calc_response, Response, HASHHEXLEN)) {
+            register_response(evtp, 200);
+            LOGI("register_success");
+        } else {
+            register_response(evtp, 401);
+            LOGI("register_failed");
+        }
+        osip_free(algorithm);
+        osip_free(username);
+        osip_free(realm);
+        osip_free(nonce);
+        osip_free(nonce_count);
+        osip_free(uri);
     } else {
-        register_response(evtp, 401);
-        LOGI("register_failed");
+        LOGI("register 401_unauthorized");
+        register_401unauthorized_response();
     }
-    osip_free(algorithm);
-    osip_free(username);
-    osip_free(realm);
-    osip_free(nonce);
-    osip_free(nonce_count);
-    osip_free(uri);
+
+    return 0;
 }
 
 int invite_ack_handle(eXosip_event_t *evtp)
