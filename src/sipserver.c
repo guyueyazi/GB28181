@@ -102,11 +102,15 @@ int register_handle(eXosip_event_t *evtp)
         SIP_STRDUP(nonce);
         SIP_STRDUP(nonce_count);
         SIP_STRDUP(uri);
+        LOGI("method: %s", method);
         LOGI("realm: %s", realm);
         LOGI("nonce: %s", nonce);
+        LOGI("nonce_count: %s", nonce_count);
+        LOGI("message_gop: %s", ss_dst->message_gop);
         LOGI("username: %s", username);
         LOGI("uri: %s", uri);
         LOGI("algorithm: %s", algorithm);
+        LOGI("cnonce:%s", ss_dst->cnonce);
         DigestCalcHA1(algorithm, username, realm, PASSWD, nonce, nonce_count, HA1);
         DigestCalcResponse(HA1, nonce, nonce_count, ss_dst->cnonce, ss_dst->message_qop, 0, method, uri, HA2, Response);
         if (!memcmp(calc_response, Response, HASHHEXLEN)) {
