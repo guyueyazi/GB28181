@@ -315,7 +315,38 @@ int sip_event_handle(eXosip_event_t *evtp)
         case EXOSIP_CALL_INVITE:
             LOGI("EXOSIP_CALL_INVITE");
             break;
+        case EXOSIP_CALL_REINVITE:
+            LOGI("EXOSIP_CALL_REINVITE");
+            break;
+        case EXOSIP_CALL_PROCEEDING:
+            LOGI("EXOSIP_CALL_PROCEEDING");
+            break;
+        case EXOSIP_CALL_NOANSWER:
+            LOGI("EXOSIP_CALL_NOANSWER");
+            break;
+        case EXOSIP_CALL_REQUESTFAILURE:
+            LOGI("EXOSIP_CALL_REQUESTFAILURE");
+            break;
+		case EXOSIP_CALL_GLOBALFAILURE:
+            LOGI("EXOSIP_CALL_GLOBALFAILURE");
+            break;
+		case EXOSIP_CALL_SERVERFAILURE:
+            LOGI("EXOSIP_CALL_SERVERFAILURE");
+            break;
+        case EXOSIP_CALL_ACK:
+            LOGI("EXOSIP_CALL_ACK");
+            break;
+        case EXOSIP_CALL_CLOSED:
+            LOGI("EXOSIP_CALL_CLOSED");
+            break;
+        case EXOSIP_CALL_CANCELLED:
+            LOGI("EXOSIP_CALL_CANCELLED");
+            break;
+        case EXOSIP_CALL_RELEASED:
+            LOGI("EXOSIP_CALL_RELEASED");
+            break;
         default:
+            LOGI("msg type: %d", evtp->type);
             break;
     }
 
