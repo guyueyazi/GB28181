@@ -120,7 +120,7 @@ int register_handle(eXosip_event_t *evtp)
         osip_free(uri);
     } else {
         LOGI("register 401_unauthorized");
-        register_401unauthorized_response();
+        register_401unauthorized_response(evtp);
     }
 
     return 0;
