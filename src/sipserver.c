@@ -36,7 +36,7 @@ void dbg_dump_request(eXosip_event_t *evtp)
     size_t len;
 
     osip_message_to_str(evtp->request, &s, &len);
-    printf("%s\n", s);
+    printf("%s", s);
 }
 void dbg_dump_response(eXosip_event_t *evtp)
 {
@@ -44,7 +44,7 @@ void dbg_dump_response(eXosip_event_t *evtp)
     size_t len;
 
     osip_message_to_str(evtp->response, &s, &len);
-    printf("%s\n", s);
+    printf("%s", s);
 }
 
 static void register_response(eXosip_event_t *evtp, int code)
@@ -88,7 +88,7 @@ static void register_401unauthorized_response(eXosip_event_t *evtp)
 int register_handle(eXosip_event_t *evtp)
 {
 #define SIP_STRDUP(field) if (ss_dst->field) field = osip_strdup_without_quote(ss_dst->field)
-    char *method, *algorithm, *username, *realm, *nonce, *nonce_count, *uri;
+    char *method, *algorithm, *username, *realm, *nonce, *nonce_count = NULL, *uri;
     char calc_response[HASHHEXLEN];
     osip_authorization_t * ss_dst = NULL;
     HASHHEX HA1, HA2 = "", Response;
@@ -116,7 +116,8 @@ int register_handle(eXosip_event_t *evtp)
         osip_free(username);
         osip_free(realm);
         osip_free(nonce);
-        osip_free(nonce_count);
+        if (nonce_count)
+            osip_free(nonce_count);
         osip_free(uri);
     } else {
         LOGI("register 401_unauthorized");
