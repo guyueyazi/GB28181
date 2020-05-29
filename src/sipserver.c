@@ -90,8 +90,8 @@ static void auth_calc_response(char *username, char *uri, char *method, HASHHEX 
     HASHHEX HA1;
     HASHHEX rresponse;
 
-    DigestCalcHA1("REGISTER", username, core->realm, core->password, core->nonce, NULL, HA1);
-    DigestCalcResponse(HA1, core->nonce, NULL, NULL, NULL, 0, method, uri, NULL, rresponse);
+    DigestCalcHA1("REGISTER", username, REALM, PASSWD, NONCE, NULL, HA1);
+    DigestCalcResponse(HA1, NONCE, NULL, NULL, NULL, 0, method, uri, NULL, rresponse);
     memcpy(response, rresponse, HASHHEXLEN);
 }
 
@@ -123,7 +123,7 @@ int register_handle(eXosip_event_t *evtp)
         LOGI("cnonce:%s", ss_dst->cnonce);
         DigestCalcHA1(algorithm, username, realm, PASSWD, nonce, nonce_count, HA1);
         DigestCalcResponse(HA1, nonce, nonce_count, ss_dst->cnonce, ss_dst->message_qop, 0, method, uri, HA2, Response);
-        auth_calc_response(core, username, uri, method, calc_response);
+        auth_calc_response(username, uri, method, calc_response);
         if (!memcmp(calc_response, Response, HASHHEXLEN)) {
             register_response(evtp, 200);
             LOGI("register_success");
