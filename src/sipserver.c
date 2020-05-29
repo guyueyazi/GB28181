@@ -88,7 +88,7 @@ static void register_401unauthorized_response(eXosip_event_t *evtp)
 int register_handle(eXosip_event_t *evtp)
 {
 #define SIP_STRDUP(field) if (ss_dst->field) field = osip_strdup_without_quote(ss_dst->field)
-    char *method, *algorithm, *username, *realm, *nonce, *nonce_count = NULL, *uri;
+    char *method = NULL, *algorithm = NULL, *username = NULL, *realm = NULL, *nonce = NULL, *nonce_count = NULL, *uri = NULL;
     char calc_response[HASHHEXLEN];
     osip_authorization_t * ss_dst = NULL;
     HASHHEX HA1, HA2 = "", Response;
