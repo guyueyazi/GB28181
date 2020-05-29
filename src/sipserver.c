@@ -69,8 +69,8 @@ static void register_401unauthorized_response(eXosip_event_t *evtp)
 
     osip_www_authenticate_init(&header);
     osip_www_authenticate_set_auth_type (header, osip_strdup("Digest"));
-    osip_www_authenticate_set_realm(header,osip_enquote(core->realm));
-    osip_www_authenticate_set_nonce(header,osip_enquote(core->nonce));
+    osip_www_authenticate_set_realm(header,osip_enquote(REALM));
+    osip_www_authenticate_set_nonce(header,osip_enquote(NONCE));
     osip_www_authenticate_to_str(header, &dest);
     ret = eXosip_message_build_answer (app.ctx, evtp->tid, 401, &reg);
     if ( ret == 0 && reg != NULL ) {
