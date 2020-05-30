@@ -102,6 +102,8 @@ static void register_response(eXosip_event_t *evtp, int code)
         LOGI("send register answer");
         eXosip_message_send_answer (app.ctx, evtp->tid, code, reg);
         eXosip_unlock(app.ctx);
+    } else {
+        LOGE("build answer error(%d)", ret);
     }
 }
 
