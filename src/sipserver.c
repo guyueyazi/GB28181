@@ -179,8 +179,8 @@ static int cmd_callstart()
 	}
 
 	snprintf(head, sizeof(head)-1, "<%s;lr>", "");
-	osip_list_special_free(&msg->routes, (void(*)(void*))osip_route_free);
-	osip_message_set_route(msg, head);
+	//osip_list_special_free(&msg->routes, (void(*)(void*))osip_route_free);
+	//osip_message_set_route(msg, head);
     osip_message_set_body(msg, sdp, strlen(sdp));
 	osip_message_set_content_type(msg, "application/sdp");
 	snprintf(session_exp, sizeof(session_exp)-1, "%i;refresher=uac", TIMEOUT);
