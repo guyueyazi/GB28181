@@ -97,7 +97,7 @@ static void register_response(eXosip_event_t *evtp, int code)
     osip_message_t * reg = NULL;
 
     ret = eXosip_message_build_answer (app.ctx, evtp->tid, code, &reg);
-    if (!ret && !reg) {
+    if (!ret && reg) {
         eXosip_lock(app.ctx);
         LOGI("send register answer");
         eXosip_message_send_answer (app.ctx, evtp->tid, code, reg);
