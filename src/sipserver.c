@@ -99,6 +99,7 @@ static void register_response(eXosip_event_t *evtp, int code)
     ret = eXosip_message_build_answer (app.ctx, evtp->tid, code, &reg);
     if (!ret && !reg) {
         eXosip_lock(app.ctx);
+        LOGI("send register answer");
         eXosip_message_send_answer (app.ctx, evtp->tid, code, reg);
         eXosip_unlock(app.ctx);
     }
@@ -178,7 +179,7 @@ static int cmd_callstart()
 		return -1;
 	}
 
-	snprintf(head, sizeof(head)-1, "<%s;lr>", "");
+	//snprintf(head, sizeof(head)-1, "<%s;lr>", "");
 	//osip_list_special_free(&msg->routes, (void(*)(void*))osip_route_free);
 	//osip_message_set_route(msg, head);
     osip_message_set_body(msg, sdp, strlen(sdp));
