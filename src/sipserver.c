@@ -417,7 +417,7 @@ int main()
     app.running = 1;
     if (sipserver_init())
         return 0;
-    sleep(5);
+    sleep(10);
     cmd_callstart();
     while(app.running) 
         sleep(3);
