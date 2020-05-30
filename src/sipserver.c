@@ -291,7 +291,7 @@ int invite_ack_handle(eXosip_event_t *evtp)
     /*setup:active/passive*/
     for (i = 0; i < video_sdp->a_attributes.nb_elt; i++) {
         sdp_attribute_t *attr = (sdp_attribute_t*)osip_list_get(&video_sdp->a_attributes, i);
-        LOGI("--- %s : %s\n", attr->a_att_field, attr->a_att_value);
+        LOGI("--- %s : %s", attr->a_att_field, attr->a_att_value);
         if (strcmp(attr->a_att_field, "setup") == 0) 
             strcpy(setup, attr->a_att_value);
     }
