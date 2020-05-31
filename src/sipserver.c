@@ -275,6 +275,7 @@ void *media_thread(void *arg)
     struct sockaddr_in serv_addr;
     char buf[1025];
     FILE *fp = fopen("./gb28181.ps", "w");
+    const char *ip = get_ip();
 
     if (!fp) {
         LOGE("open file ./gb28181.ps error");
@@ -283,7 +284,7 @@ void *media_thread(void *arg)
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     memset(&serv_addr, '0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr.sin_addr.s_addr = inet_addr(ip);//htonl(INADDR_ANY);
     serv_addr.sin_port = htons(PORT);
     bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
