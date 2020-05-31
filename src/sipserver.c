@@ -338,7 +338,7 @@ int invite_ack_handle(eXosip_event_t *evtp)
     }
     media.remote_ip = strdup(connection->c_addr);
     media.port = strdup(video_sdp->m_port);
-    pthread_create(&tid, NULL, media_thread, media);
+    pthread_create(&tid, NULL, media_thread, &media);
     return 0;
 err:
     return -1;
