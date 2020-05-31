@@ -15,6 +15,11 @@
 #define RTP_PORT    18040
 
 typedef struct {
+    char *remote_ip;
+    char *port;
+} media_info_t;
+
+typedef struct {
     struct eXosip_t *ctx;
     pthread_t tid;
     int running;
@@ -22,6 +27,7 @@ typedef struct {
     char user_id[64];
     char user_ip[64];
     int user_port;
+    int registered;
 } app_t;
 
 static app_t app;
@@ -239,6 +245,7 @@ int register_handle(eXosip_event_t *evtp)
         auth_calc_response(username, uri, method, calc_response);
         if (!memcmp(calc_response, Response, HASHHEXLEN)) {
             register_response(evtp, 200);
+            app.registered = 1;
             LOGI("register_success");
             //sleep(3);
             //LOGI("start call");
@@ -262,7 +269,39 @@ int register_handle(eXosip_event_t *evtp)
     return 0;
 }
 
+void *media_thread(void *arg)
+{
+    int listenfd = 0, connfd = 0, ret;
+    struct sockaddr_in serv_addr;
+    char buf[1025];
+    FILE *fp = fopen("./gb28181.ps", "w");
 
+    if (!fp) {
+        LOGE("open file ./gb28181.ps error");
+        goto exit;
+    }
+    listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    memset(&serv_addr, '0', sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr.sin_port = htons(5000);
+    bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    listen(listenfd, 10);
+    connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
+    LOGI("got connection");
+
+    for (;;) {
+        if (read(connfd, buf, sizeof(buf)) < 0) {
+            LOGE("read error, %s", strerror(errno));
+            goto exit;
+        }
+        fwrite(buf, ret, 1, fp);
+        fflush(fp);
+    }
+
+exit:
+    return NULL;
+}
 
 int invite_ack_handle(eXosip_event_t *evtp)
 {
@@ -272,6 +311,8 @@ int invite_ack_handle(eXosip_event_t *evtp)
     sdp_message_t *sdp_msg;
     sdp_connection_t *connection;
     sdp_media_t * video_sdp;
+    media_info_t *media;
+    pthread_t tid;
 
     code = osip_message_get_status_code(evtp->response);		                    
     eXosip_call_build_ack(app.ctx, evtp->did, &ack);  
@@ -295,6 +336,9 @@ int invite_ack_handle(eXosip_event_t *evtp)
         if (strcmp(attr->a_att_field, "setup") == 0) 
             strcpy(setup, attr->a_att_value);
     }
+    media->remote_ip = strdup(connection->c_addr);
+    media->port = strdup(video_sdp->m_port);
+    pthread_create(&tid, NULL, media_thread, media);
     return 0;
 err:
     return -1;
@@ -316,45 +360,6 @@ int sip_event_handle(eXosip_event_t *evtp)
             if (evtp->response) {
                 invite_ack_handle(evtp);
             }
-            break;
-        case EXOSIP_REGISTRATION_SUCCESS:
-            LOGI("EXOSIP_REGISTRATION_SUCCESS");
-            break;
-        case EXOSIP_REGISTRATION_FAILURE:
-            LOGI("EXOSIP_REGISTRATION_FAILURE");
-            break;
-        case EXOSIP_CALL_INVITE:
-            LOGI("EXOSIP_CALL_INVITE");
-            break;
-        case EXOSIP_CALL_REINVITE:
-            LOGI("EXOSIP_CALL_REINVITE");
-            break;
-        case EXOSIP_CALL_PROCEEDING:
-            LOGI("EXOSIP_CALL_PROCEEDING");
-            break;
-        case EXOSIP_CALL_NOANSWER:
-            LOGI("EXOSIP_CALL_NOANSWER");
-            break;
-        case EXOSIP_CALL_REQUESTFAILURE:
-            LOGI("EXOSIP_CALL_REQUESTFAILURE");
-            break;
-		case EXOSIP_CALL_GLOBALFAILURE:
-            LOGI("EXOSIP_CALL_GLOBALFAILURE");
-            break;
-		case EXOSIP_CALL_SERVERFAILURE:
-            LOGI("EXOSIP_CALL_SERVERFAILURE");
-            break;
-        case EXOSIP_CALL_ACK:
-            LOGI("EXOSIP_CALL_ACK");
-            break;
-        case EXOSIP_CALL_CLOSED:
-            LOGI("EXOSIP_CALL_CLOSED");
-            break;
-        case EXOSIP_CALL_CANCELLED:
-            LOGI("EXOSIP_CALL_CANCELLED");
-            break;
-        case EXOSIP_CALL_RELEASED:
-            LOGI("EXOSIP_CALL_RELEASED");
             break;
         default:
             LOGI("msg type: %d", evtp->type);
@@ -417,10 +422,15 @@ int main()
     app.running = 1;
     if (sipserver_init())
         return 0;
-    sleep(10);
-    cmd_callstart();
-    while(app.running) 
-        sleep(3);
+    while(app.running)  {
+        static int done = 0;
+        
+        if (app.registered && !done) {
+            cmd_callstart();
+            done = 1;
+        }
+        sleep(1);
+    }
 
     return 0;
 }
