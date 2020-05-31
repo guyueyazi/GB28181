@@ -284,7 +284,7 @@ void *media_thread(void *arg)
     memset(&serv_addr, '0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(5000);
+    serv_addr.sin_port = htons(PORT);
     bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
     connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
@@ -311,7 +311,7 @@ int invite_ack_handle(eXosip_event_t *evtp)
     sdp_message_t *sdp_msg;
     sdp_connection_t *connection;
     sdp_media_t * video_sdp;
-    media_info_t *media;
+    media_info_t media;
     pthread_t tid;
 
     code = osip_message_get_status_code(evtp->response);		                    
@@ -336,8 +336,8 @@ int invite_ack_handle(eXosip_event_t *evtp)
         if (strcmp(attr->a_att_field, "setup") == 0) 
             strcpy(setup, attr->a_att_value);
     }
-    media->remote_ip = strdup(connection->c_addr);
-    media->port = strdup(video_sdp->m_port);
+    media.remote_ip = strdup(connection->c_addr);
+    media.port = strdup(video_sdp->m_port);
     pthread_create(&tid, NULL, media_thread, media);
     return 0;
 err:
