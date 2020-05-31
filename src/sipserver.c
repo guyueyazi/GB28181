@@ -285,10 +285,10 @@ void *media_thread(void *arg)
     memset(&serv_addr, '0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = inet_addr(ip);//htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_port = htons(RTP_PORT);
     bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
-    LOGI("listen on %s:%d", ip, PORT);
+    LOGI("listen on %s:%d", ip, RTP_PORT);
     connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
     LOGI("got connection");
 
