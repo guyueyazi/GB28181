@@ -288,6 +288,7 @@ void *media_thread(void *arg)
     serv_addr.sin_port = htons(PORT);
     bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
+    LOGI("listen on %s:%d", ip, PORT);
     connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
     LOGI("got connection");
 
