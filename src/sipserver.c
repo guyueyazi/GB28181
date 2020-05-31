@@ -271,11 +271,13 @@ int register_handle(eXosip_event_t *evtp)
 
 void *media_thread(void *arg)
 {
-    int listenfd = 0, connfd = 0, ret;
-    struct sockaddr_in serv_addr;
+    int listenfd = 0, connfd = 0, ret, c;
+    struct sockaddr_in serv_addr, client;
     char buf[1025];
     FILE *fp = fopen("./gb28181.ps", "w");
     const char *ip = get_ip();
+    char *client_ip;
+    int client_port;
 
     if (!fp) {
         LOGE("open file ./gb28181.ps error");
@@ -289,14 +291,19 @@ void *media_thread(void *arg)
     bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
     LOGI("listen on %s:%d", ip, RTP_PORT);
-    connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
-    LOGI("got connection");
+    c = sizeof(struct sockaddr_in);
+    connfd = accept(listenfd, (struct sockaddr *)&client, (socklen_t*)&c);
+    client_ip = inet_ntoa(client.sin_addr);
+    client_port = ntohs(client.sin_port);
+    LOGI("got connection from %s:%d", client_ip, client_port);
 
     for (;;) {
-        if (read(connfd, buf, sizeof(buf)) < 0) {
+        ret = read(connfd, buf, sizeof(buf));
+        if (ret < 0) {
             LOGE("read error, %s", strerror(errno));
             goto exit;
         }
+        LOGI("size:%d", ret);
         fwrite(buf, ret, 1, fp);
         fflush(fp);
     }
