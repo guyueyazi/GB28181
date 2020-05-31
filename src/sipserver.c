@@ -8,7 +8,7 @@
 #define NONCE       "1234567890123456"
 #define EXPIRY      3600
 #define PORT        5060
-#define UAS_VERSION "SipUAv0.1"//"SipUASv0.1"
+#define UAS_VERSION "SipUAv0.1"
 #define SIP_ID      "34020000002000000001"
 #define PASSWD      "123456"
 #define TIMEOUT     1800
@@ -187,9 +187,6 @@ static int cmd_callstart()
 		return -1;
 	}
 
-	//snprintf(head, sizeof(head)-1, "<%s;lr>", "");
-	//osip_list_special_free(&msg->routes, (void(*)(void*))osip_route_free);
-	//osip_message_set_route(msg, head);
     osip_message_set_body(msg, sdp, strlen(sdp));
 	osip_message_set_content_type(msg, "application/sdp");
 	snprintf(session_exp, sizeof(session_exp)-1, "%i;refresher=uac", TIMEOUT);
@@ -247,9 +244,6 @@ int register_handle(eXosip_event_t *evtp)
             register_response(evtp, 200);
             app.registered = 1;
             LOGI("register_success");
-            //sleep(3);
-            //LOGI("start call");
-            //cmd_callstart();
 
         } else {
             register_response(evtp, 401);
@@ -286,7 +280,7 @@ void *media_thread(void *arg)
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     memset(&serv_addr, '0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr(ip);//htonl(INADDR_ANY);
+    serv_addr.sin_addr.s_addr = inet_addr(ip);
     serv_addr.sin_port = htons(RTP_PORT);
     bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
