@@ -450,9 +450,9 @@ static int cmd_register()
 			return -1;
 		}
 	} else { // new register
-        sprintf(from, "sip:%s@%s:%d", USER_ID, app.server_ip, USER_PORT);
+        sprintf(from, "sip:%s@%s:%d", app.sip_id, app.server_ip, USER_PORT);
         sprintf(proxy, "sip:%s@%s:%d", app.sip_id, app.server_ip, PORT);
-        sprintf(contact, "sip:%s@%s:%d", USER_ID, get_ip(), USER_PORT);
+        sprintf(contact, "sip:%s@%s:%d", app.sip_id, get_ip(), USER_PORT);
 		app.regid = eXosip_register_build_initial_register(app.ctx, from, proxy, contact, EXPIRY, &msg);
 		if (app.regid <= 0){
             LOGE("register build failed %d", app.regid);
