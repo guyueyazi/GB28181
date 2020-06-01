@@ -11,7 +11,6 @@
 #define PASSWD      "123456"
 #define TIMEOUT     1800
 #define RTP_PORT    18040
-#define USER_ID     "34020000001320000222"
 #define USER_PORT   5060
 
 typedef struct {
@@ -24,8 +23,8 @@ typedef struct {
     pthread_t tid;
     int running;
     int callid;
-    char user_id[64];
-    char user_ip[64];
+    char *user_id;
+    char *user_ip;
     int user_port;
     int registered;
     char *server_ip;
@@ -52,6 +51,7 @@ void show_info()
     printf("--- port: \t%d\n", PORT);
     printf("--- transport: \tudp\n");
     printf("--- server: \t%s\n", app.server_ip);
+    printf("--- user id: \t%s\n", app.user_id);
 }
 
 const char* get_ip(void)
@@ -450,9 +450,9 @@ static int cmd_register()
 			return -1;
 		}
 	} else { // new register
-        sprintf(from, "sip:%s@%s:%d", app.sip_id, app.server_ip, USER_PORT);
+        sprintf(from, "sip:%s@%s:%d", app.user_id, app.server_ip, USER_PORT);
         sprintf(proxy, "sip:%s@%s:%d", app.sip_id, app.server_ip, PORT);
-        sprintf(contact, "sip:%s@%s:%d", app.sip_id, get_ip(), USER_PORT);
+        sprintf(contact, "sip:%s@%s:%d", app.user_id, get_ip(), USER_PORT);
 		app.regid = eXosip_register_build_initial_register(app.ctx, from, proxy, contact, EXPIRY, &msg);
 		if (app.regid <= 0){
             LOGE("register build failed %d", app.regid);
@@ -496,6 +496,7 @@ int main(int argc, char *argv[])
     app.server_ip = getenv("SIP_SERVER_IP");
     app.sip_id = getenv("SIP_SERVER_ID");
     app.relm = getenv("SIP_SERVER_RELM");
+    app.user_id = getenv("SIP_USER_ID");
     show_info();
     if (sipserver_init())
         goto exit;
