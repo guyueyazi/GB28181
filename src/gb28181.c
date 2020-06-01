@@ -46,7 +46,7 @@ void show_info()
 {
     printf("--- sip id: \t%s\n", app.sip_id);
     printf("--- passwd: \t%s\n", PASSWD);
-    printf("--- realm: \t%s\n", REALM);
+    printf("--- realm: \t%s\n", app.relm);
     printf("--- nonce: \t%s\n", NONCE);
     printf("--- expiry: \t%d\n", EXPIRY);
     printf("--- port: \t%d\n", PORT);
@@ -133,7 +133,7 @@ static void register_401unauthorized_response(eXosip_event_t *evtp)
 
     osip_www_authenticate_init(&header);
     osip_www_authenticate_set_auth_type (header, osip_strdup("Digest"));
-    osip_www_authenticate_set_realm(header,osip_enquote(REALM));
+    osip_www_authenticate_set_realm(header,osip_enquote(app.relm));
     osip_www_authenticate_set_nonce(header,osip_enquote(NONCE));
     osip_www_authenticate_to_str(header, &dest);
     ret = eXosip_message_build_answer (app.ctx, evtp->tid, 401, &reg);
@@ -154,7 +154,7 @@ static void auth_calc_response(char *username, char *uri, char *method, HASHHEX 
     HASHHEX HA1;
     HASHHEX rresponse;
 
-    DigestCalcHA1("REGISTER", username, REALM, PASSWD, NONCE, NULL, HA1);
+    DigestCalcHA1("REGISTER", username, app.relm, PASSWD, NONCE, NULL, HA1);
     DigestCalcResponse(HA1, NONCE, NULL, NULL, NULL, 0, method, uri, NULL, rresponse);
     memcpy(response, rresponse, HASHHEXLEN);
 }
@@ -451,7 +451,7 @@ static int cmd_register()
 		}
 	} else { // new register
         sprintf(from, "sip:%s@%s:%d", USER_ID, app.server_ip, USER_PORT);
-        sprintf(proxy, "sip:%s@%s:%d", USER_ID, app.server_ip, PORT);
+        sprintf(proxy, "sip:%s@%s:%d", app.sip_id, app.server_ip, PORT);
         sprintf(contact, "sip:%s@%s:%d", USER_ID, get_ip(), USER_PORT);
 		app.regid = eXosip_register_build_initial_register(app.ctx, from, proxy, contact, EXPIRY, &msg);
 		if (app.regid <= 0){
