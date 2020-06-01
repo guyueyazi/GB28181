@@ -362,6 +362,7 @@ int sip_event_handle(eXosip_event_t *evtp)
 {
     switch(evtp->type) {
         case EXOSIP_MESSAGE_NEW:
+            LOGI("EXOSIP_MESSAGE_NEW");
             dbg_dump_request(evtp);
             if (MSG_IS_REGISTER(evtp->request)) {
                 LOGI("get REGISTER");
