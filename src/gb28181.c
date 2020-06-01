@@ -466,7 +466,7 @@ static int cmd_register()
 int parse_param(char *argv[])
 {
     if (!argv[1]) {
-        printf("usage: %s <mode>\n\tclient : sip client\n\tserver : sip server\n", argv[0]);
+        printf("usage: %s <mode>\n\tuac : sip client\n\tuas : sip server\n", argv[0]);
         goto exit;
     } else {
         if (!strcmp(argv[1], "uac")) {
@@ -474,7 +474,7 @@ int parse_param(char *argv[])
         } else if(!strcmp(argv[1], "uas")) {
             app.mode = MODE_SERVER;
         } else {
-            printf("usage: %s <mode>\n\tclient : sip client\n\tserver : sip server\n", argv[0]);
+            printf("usage: %s <mode>\n\tuac : sip client\n\tuas : sip server\n", argv[0]);
             goto exit;
         }
     }
