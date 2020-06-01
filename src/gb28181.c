@@ -4,12 +4,10 @@
 #include "eXosip2/eXosip.h"
 #include "HTTPDigest.h"
 
-#define REALM       "3402000000"
 #define NONCE       "1234567890123456"
 #define EXPIRY      3600
 #define PORT        5060
 #define UAS_VERSION "Hikvision"//"SipUAv0.1"
-#define SIP_ID      "34020000002000000001"
 #define PASSWD      "123456"
 #define TIMEOUT     1800
 #define RTP_PORT    18040
@@ -34,6 +32,7 @@ typedef struct {
     int regid;
     int mode;
     char *sip_id;
+    char *relm;
 } app_t;
 
 enum {
@@ -496,6 +495,7 @@ int main(int argc, char *argv[])
     app.running = 1;
     app.server_ip = getenv("SIP_SERVER_IP");
     app.sip_id = getenv("SIP_SERVER_ID");
+    app.relm = getenv("SIP_SERVER_RELM");
     show_info();
     if (sipserver_init())
         goto exit;
