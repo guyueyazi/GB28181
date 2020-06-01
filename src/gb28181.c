@@ -33,6 +33,7 @@ typedef struct {
     char *server_ip;
     int regid;
     int mode;
+    char *sip_id;
 } app_t;
 
 enum {
@@ -44,7 +45,7 @@ static app_t app;
 
 void show_info()
 {
-    printf("--- sip id: \t%s\n", SIP_ID);
+    printf("--- sip id: \t%s\n", app.sip_id);
     printf("--- passwd: \t%s\n", PASSWD);
     printf("--- realm: \t%s\n", REALM);
     printf("--- nonce: \t%s\n", NONCE);
@@ -174,8 +175,8 @@ static int cmd_callstart()
     size_t len;
 
     LOGI("ip:%s", ip);
-    sprintf(from, "sip:%s@%s:%d", SIP_ID, ip, PORT);
-    sprintf(contact, "sip:%s@%s:%d", SIP_ID, ip, PORT);
+    sprintf(from, "sip:%s@%s:%d", app.sip_id, ip, PORT);
+    sprintf(contact, "sip:%s@%s:%d", app.sip_id, ip, PORT);
     sprintf(to, "sip:%s@%s:%d", app.user_id, app.user_ip, app.user_port);
     snprintf (sdp, 2048,
             "v=0\r\n"
@@ -191,7 +192,7 @@ static int cmd_callstart()
             "a=setup:passive\r\n"
             "a=connection:new\r\n"
             "y=0100000001\r\n"
-            "f=\r\n", SIP_ID, ip, ip, RTP_PORT);
+            "f=\r\n", app.sip_id, ip, ip, RTP_PORT);
 	ret = eXosip_call_build_initial_invite(app.ctx, &msg, to, from,  NULL, NULL);
 	if (ret) {
 		LOGE( "call build failed %s %s ret:%d", from, to, ret);
@@ -419,7 +420,7 @@ int sipserver_init()
         goto err;
     }
     eXosip_set_user_agent(app.ctx, UAS_VERSION);
-    if (eXosip_add_authentication_info(app.ctx, SIP_ID, SIP_ID, PASSWD, NULL, NULL)){
+    if (eXosip_add_authentication_info(app.ctx, app.sip_id, app.sip_id, PASSWD, NULL, NULL)){
         LOGE("add authentication info error");
         goto err;
     }
@@ -489,6 +490,7 @@ int main(int argc, char *argv[])
         goto exit;
     app.running = 1;
     app.server_ip = getenv("SIP_SERVER_IP");
+    app.sip_id = getenv("SIP_SERVER_ID");
     show_info();
     if (sipserver_init())
         goto exit;
