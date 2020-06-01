@@ -13,6 +13,8 @@
 #define PASSWD      "123456"
 #define TIMEOUT     1800
 #define RTP_PORT    18040
+#define USER_ID     "34020000001320000222"
+#define USER_PORT   5060
 
 typedef struct {
     char *remote_ip;
@@ -28,7 +30,15 @@ typedef struct {
     char user_ip[64];
     int user_port;
     int registered;
+    char *server_ip;
+    int regid;
+    int mode;
 } app_t;
+
+enum {
+    MODE_CLIENT,
+    MODE_SERVER,
+};
 
 static app_t app;
 
@@ -41,6 +51,7 @@ void show_info()
     printf("--- expiry: \t%d\n", EXPIRY);
     printf("--- port: \t%d\n", PORT);
     printf("--- transport: \tudp\n");
+    printf("--- server: \t%s\n", app.server_ip);
 }
 
 const char* get_ip(void)
@@ -419,21 +430,86 @@ err:
     return -1;
 }
 
-int main()
+static int cmd_register()
 {
-    show_info();
+	int ret = -1;
+	osip_message_t *msg = NULL;
+    char from[1024] = {0};
+    char contact[1024] = {0};
+    char proxy[1024] = {0};
+
+	if (app.regid > 0){ // refresh register
+		ret = eXosip_register_build_register(app.ctx, app.regid, EXPIRY, &msg);
+		if (!ret){
+            LOGE("registe rrefresh build failed %d", ret);
+			return -1;
+		}
+	} else { // new register
+        sprintf(from, "sip:%s@%s:%d", USER_ID, app.server_ip, USER_PORT);
+        sprintf(proxy, "sip:%s@%s:%d", USER_ID, app.server_ip, PORT);
+        sprintf(contact, "sip:%s@%s:%d", USER_ID, get_ip(), USER_PORT);
+		app.regid = eXosip_register_build_initial_register(app.ctx, from, proxy, contact, EXPIRY, &msg);
+		if (app.regid <= 0){
+            LOGE("register build failed %d", app.regid);
+			return -1;
+		}
+	}
+	ret = eXosip_register_send_register(app.ctx, app.regid, msg);
+	if (!ret){
+        LOGE("send register error(%d)", ret);
+		return ret;
+	}
+	return ret;
+}
+
+int parse_param(char *argv[])
+{
+    if (!argv[1]) {
+        printf("usage: %s <mode>\n\tclient : sip client\n\tserver : sip server\n", argv[0]);
+        goto exit;
+    } else {
+        if (!strcmp(argv[1], "uac")) {
+            app.mode = MODE_CLIENT;
+        } else if(!strcmp(argv[1], "uas")) {
+            app.mode = MODE_SERVER;
+        } else {
+            printf("usage: %s <mode>\n\tclient : sip client\n\tserver : sip server\n", argv[0]);
+            goto exit;
+        }
+    }
+
+    return 0;
+exit:
+    return -1;
+}
+
+int main(int argc, char *argv[])
+{
+    if (parse_param(argv) < 0)
+        goto exit;
     app.running = 1;
+    app.server_ip = getenv("SIP_SERVER_IP");
+    show_info();
     if (sipserver_init())
-        return 0;
+        goto exit;
     while(app.running)  {
-        static int done = 0;
-        
-        if (app.registered && !done) {
-            cmd_callstart();
-            done = 1;
+        if (app.mode == MODE_SERVER) {
+            static int done = 0;
+
+            if (app.registered && !done) {
+                cmd_callstart();
+                done = 1;
+            }
+        } else {
+            if (!app.registered) {
+                LOGI("send register command to sip server");
+                cmd_register();
+                app.registered = 1;
+            }
         }
         sleep(1);
     }
 
+exit:
     return 0;
 }

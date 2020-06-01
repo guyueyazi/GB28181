@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-set(APPNAME sipserver)
+set(APPNAME gb28181)
 if(CROSS_COMPILE)
   set(CMAKE_C_COMPILER ${CROSS_COMPILE}-gcc)
   set(CMAKE_CXX_COMPILER ${CROSS_COMPILE}-g++)
