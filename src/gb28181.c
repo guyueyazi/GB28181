@@ -8,7 +8,7 @@
 #define NONCE       "1234567890123456"
 #define EXPIRY      3600
 #define PORT        5060
-#define UAS_VERSION "SipUAv0.1"
+#define UAS_VERSION "Hikvision"//"SipUAv0.1"
 #define SIP_ID      "34020000002000000001"
 #define PASSWD      "123456"
 #define TIMEOUT     1800
