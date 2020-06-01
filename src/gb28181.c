@@ -376,6 +376,10 @@ int sip_event_handle(eXosip_event_t *evtp)
                 invite_ack_handle(evtp);
             }
             break;
+        case EXOSIP_REGISTRATION_FAILURE:
+            dbg_dump_response("evtp");
+            LOGI("EXOSIP_REGISTRATION_FAILURE");
+            break;
         default:
             LOGI("msg type: %d", evtp->type);
             break;
