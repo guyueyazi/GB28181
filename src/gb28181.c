@@ -398,6 +398,7 @@ static void * sip_eventloop_thread(void *arg)
 			continue;
 		}
         eXosip_automatic_action(app.ctx);
+        dbg_dump_request(evtp);
         sip_event_handle(evtp);
     }
 
@@ -456,7 +457,7 @@ static int cmd_register()
 		}
 	}
 	ret = eXosip_register_send_register(app.ctx, app.regid, msg);
-	if (!ret){
+	if (ret){
         LOGE("send register error(%d)", ret);
 		return ret;
 	}
