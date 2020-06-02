@@ -430,6 +430,16 @@ int sip_event_handle(eXosip_event_t *evtp)
             LOGI("EXOSIP_CALL_INVITE");
             dbg_dump_request(evtp);
             break;
+        case EXOSIP_IN_SUBSCRIPTION_NEW:
+            LOGI("EXOSIP_IN_SUBSCRIPTION_NEW");
+            dbg_dump_request(evtp);
+            break;
+        case EXOSIP_CALL_NOANSWER:
+            LOGI("EXOSIP_IN_SUBSCRIPTION_NEW");
+            break;
+        case EXOSIP_CALL_RELEASED:
+            LOGI("EXOSIP_CALL_RELEASED");
+            break;
         default:
             LOGI("msg type: %d", evtp->type);
             break;
