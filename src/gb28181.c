@@ -417,6 +417,8 @@ int catalog_handle(eXosip_event_t *evtp)
 {
     char rsp_xml_body[2048] = {0}, from[512] = {0}, to[512] = {0};
     osip_message_t* rsp_msg = NULL;
+    char *s;
+    size_t len;
 
     snprintf(rsp_xml_body, sizeof(rsp_xml_body), "<?xml version=\"1.0\"?>\r\n"
             "<Response>\r\n"
@@ -475,6 +477,9 @@ int catalog_handle(eXosip_event_t *evtp)
     osip_message_set_body(rsp_msg, rsp_xml_body, strlen(rsp_xml_body));
     osip_message_set_content_type(rsp_msg, "Application/MANSCDP+xml");
     eXosip_message_send_request(app.ctx, rsp_msg);	
+
+    osip_message_to_str(rsp_msg, &s, &len);
+    LOGI("send catalog: \n%s", s);
 
     return 0;
 }
