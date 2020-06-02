@@ -550,7 +550,7 @@ int sip_event_handle(eXosip_event_t *evtp)
             break;
         case EXOSIP_MESSAGE_REQUESTFAILURE:
             LOGI("EXOSIP_MESSAGE_REQUESTFAILURE");
-            dbg_dump_response(evtp);
+            dbg_dump_request(evtp);
             break;
         default:
             LOGI("msg type: %d", evtp->type);
