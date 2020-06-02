@@ -466,10 +466,13 @@ int message_handle(eXosip_event_t *evtp)
 
     osip_message_get_body(evtp->request, 0, &req_body);
     parse_xml(req_body->body, "<CmdType>", false, "</CmdType>", false, cmd);
-    LOGI("got message: %s", cmd);
     if (!strcmp(cmd, "Catalog")) {
+        LOGI("got message: %s", cmd);
         dbg_dump_request(evtp);
         catalog_handle(evtp);
+    } else if (!strcmp(cmd, "Keepalive")) {
+    } else {
+        LOGI("got message: %s", cmd);
     }
 
     return 0;
@@ -479,12 +482,11 @@ int sip_event_handle(eXosip_event_t *evtp)
 {
     switch(evtp->type) {
         case EXOSIP_MESSAGE_NEW:
-            LOGI("EXOSIP_MESSAGE_NEW");
+            //LOGI("EXOSIP_MESSAGE_NEW");
             if (MSG_IS_REGISTER(evtp->request)) {
                 LOGI("get REGISTER");
                 register_handle(evtp);
             } else if (MSG_IS_MESSAGE(evtp->request)) {
-                LOGI("got MESSAGE");
                 message_handle(evtp);
             }
             break;
