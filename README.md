@@ -7,6 +7,7 @@
 
 ## 封包
 ![image](./images/协议.jpeg)
+### REGISTER
 - Request-Line: REGISTER sip:si服务器国标id@sip服务器ip：sip服务器端口 SIP/2.0
 - Via: SIP/2.0/(TCP or UDP) sip设备ip：sip设备端口;rport;branch=xxx
 - From: <sip:sip设备国标id@sip服务器域id>;tag=xxx
