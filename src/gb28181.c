@@ -425,7 +425,7 @@ int catalog_handle(eXosip_event_t *evtp)
             "<CmdType>Catalog</CmdType>\r\n"
             "<SN>123456</SN>\r\n"
             "<DeviceID>31010100992170000066</DeviceID>\r\n"
-            "<SumNum>1</SumNum>\r\n"
+            "<SumNum>3</SumNum>\r\n"
             "<DeviceList Num=\"1\">\r\n"
             "<Item>\r\n"
             "<DeviceID>31010100992170000077</DeviceID>\r\n"
@@ -547,6 +547,9 @@ int sip_event_handle(eXosip_event_t *evtp)
             break;
         case EXOSIP_CALL_RELEASED:
             LOGI("EXOSIP_CALL_RELEASED");
+            break;
+        case EXOSIP_MESSAGE_REQUESTFAILURE:
+            LOGI("EXOSIP_MESSAGE_REQUESTFAILURE");
             break;
         default:
             LOGI("msg type: %d", evtp->type);
