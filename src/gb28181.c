@@ -358,84 +358,6 @@ err:
     return -1;
 }
 
-int sip_event_handle(eXosip_event_t *evtp)
-{
-    switch(evtp->type) {
-        case EXOSIP_MESSAGE_NEW:
-            LOGI("EXOSIP_MESSAGE_NEW");
-            dbg_dump_request(evtp);
-            if (MSG_IS_REGISTER(evtp->request)) {
-                LOGI("get REGISTER");
-                register_handle(evtp);
-            }
-            break;
-        case EXOSIP_CALL_ANSWERED:
-            LOGI("EXOSIP_CALL_ANSWERED");
-            dbg_dump_response(evtp);
-            if (evtp->response) {
-                invite_ack_handle(evtp);
-            }
-            break;
-        case EXOSIP_REGISTRATION_FAILURE:
-            dbg_dump_response(evtp);
-            LOGI("EXOSIP_REGISTRATION_FAILURE");
-            break;
-        default:
-            LOGI("msg type: %d", evtp->type);
-            break;
-    }
-    eXosip_event_free(evtp);
-
-    return 0;
-}
-
-static void * sip_eventloop_thread(void *arg)
-{
-    while(app.running) {
-		osip_message_t *msg = NULL;
-		eXosip_event_t *evtp = eXosip_event_wait(app.ctx, 0, 20);
-
-		if (!evtp){
-			/* auto process,such as:register refresh,auth,call keep... */
-			eXosip_automatic_action(app.ctx);
-			osip_usleep(100000);
-			continue;
-		}
-        eXosip_automatic_action(app.ctx);
-        dbg_dump_request(evtp);
-        sip_event_handle(evtp);
-    }
-
-    return NULL;
-}
-
-int sipserver_init()
-{
-    app.ctx = eXosip_malloc();
-    if (!app.ctx) {
-        LOGE("new uas context error");
-        goto err;
-    }
-	if (eXosip_init(app.ctx)) {
-        LOGE("exosip init error");
-        goto err;
-	}
-    if (eXosip_listen_addr(app.ctx, IPPROTO_UDP, NULL, PORT, AF_INET, 0)) {
-        LOGE("listen error");
-        goto err;
-    }
-    eXosip_set_user_agent(app.ctx, UAS_VERSION);
-    if (eXosip_add_authentication_info(app.ctx, app.sip_id, app.sip_id, PASSWD, NULL, NULL)){
-        LOGE("add authentication info error");
-        goto err;
-    }
-    pthread_create(&app.tid, NULL, sip_eventloop_thread, NULL);
-    return 0;
-err:
-    
-    return -1;
-}
-
 static int cmd_register()
 {
 	int ret = -1;
@@ -467,6 +389,93 @@ static int cmd_register()
 	}
 	return ret;
 }
+
+int sip_event_handle(eXosip_event_t *evtp)
+{
+    switch(evtp->type) {
+        case EXOSIP_MESSAGE_NEW:
+            LOGI("EXOSIP_MESSAGE_NEW");
+            dbg_dump_request(evtp);
+            if (MSG_IS_REGISTER(evtp->request)) {
+                LOGI("get REGISTER");
+                register_handle(evtp);
+            }
+            break;
+        case EXOSIP_CALL_ANSWERED:
+            LOGI("EXOSIP_CALL_ANSWERED");
+            dbg_dump_response(evtp);
+            if (evtp->response) {
+                invite_ack_handle(evtp);
+            }
+            break;
+        case EXOSIP_REGISTRATION_FAILURE:
+            dbg_dump_response(evtp);
+            LOGI("EXOSIP_REGISTRATION_FAILURE");
+            if (eXosip_add_authentication_info (app.ctx, app.user_id, app.user_id, PASSWD, NULL, NULL) < 0) {
+                LOGE("add authentication info error");
+                return -1;
+            }
+            cmd_register();
+            break;
+        default:
+            LOGI("msg type: %d", evtp->type);
+            break;
+    }
+    eXosip_event_free(evtp);
+
+    return 0;
+}
+
+static void * sip_eventloop_thread(void *arg)
+{
+    while(app.running) {
+		osip_message_t *msg = NULL;
+		eXosip_event_t *evtp = eXosip_event_wait(app.ctx, 0, 20);
+
+		if (!evtp){
+			/* auto process,such as:register refresh,auth,call keep... */
+			eXosip_automatic_action(app.ctx);
+			osip_usleep(100000);
+			continue;
+		}
+        eXosip_automatic_action(app.ctx);
+        dbg_dump_request(evtp);
+        sip_event_handle(evtp);
+    }
+
+    return NULL;
+}
+
+
+
+int sipserver_init()
+{
+    app.ctx = eXosip_malloc();
+    if (!app.ctx) {
+        LOGE("new uas context error");
+        goto err;
+    }
+	if (eXosip_init(app.ctx)) {
+        LOGE("exosip init error");
+        goto err;
+	}
+    if (eXosip_listen_addr(app.ctx, IPPROTO_UDP, NULL, PORT, AF_INET, 0)) {
+        LOGE("listen error");
+        goto err;
+    }
+    eXosip_set_user_agent(app.ctx, UAS_VERSION);
+    if (eXosip_add_authentication_info(app.ctx, app.sip_id, app.sip_id, PASSWD, NULL, NULL)){
+        LOGE("add authentication info error");
+        goto err;
+    }
+    pthread_create(&app.tid, NULL, sip_eventloop_thread, NULL);
+    return 0;
+err:
+    
+    return -1;
+}
+
+
 
 int parse_param(char *argv[])
 {
