@@ -428,7 +428,7 @@ int catalog_handle(eXosip_event_t *evtp)
             "<SumNum>2</SumNum>\r\n"
             "<DeviceList Num=\"2\">\r\n"
             "<Item>\r\n"
-            "<DeviceID>31010100992170000066</DeviceID>\r\n"
+            "<DeviceID>31010100992170000069</DeviceID>\r\n"
             "<Name>camera01</Name>\r\n"
             "<Manufacturer>Hikvision</Manufacturer>\r\n"
             "<Model>Camera</Model>\r\n"
