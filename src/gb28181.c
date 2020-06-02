@@ -493,6 +493,7 @@ int message_handle(eXosip_event_t *evtp)
     parse_xml(req_body->body, "<CmdType>", false, "</CmdType>", false, cmd);
     LOGI("got message: %s", cmd);
     if (!strcmp(cmd, "Catalog")) {
+        dbg_dump_request(evtp);
         catalog_handle(evtp);
     }
 
@@ -504,7 +505,6 @@ int sip_event_handle(eXosip_event_t *evtp)
     switch(evtp->type) {
         case EXOSIP_MESSAGE_NEW:
             LOGI("EXOSIP_MESSAGE_NEW");
-            dbg_dump_request(evtp);
             if (MSG_IS_REGISTER(evtp->request)) {
                 LOGI("get REGISTER");
                 register_handle(evtp);
@@ -550,6 +550,7 @@ int sip_event_handle(eXosip_event_t *evtp)
             break;
         case EXOSIP_MESSAGE_REQUESTFAILURE:
             LOGI("EXOSIP_MESSAGE_REQUESTFAILURE");
+            dbg_dump_response(evtp);
             break;
         default:
             LOGI("msg type: %d", evtp->type);
