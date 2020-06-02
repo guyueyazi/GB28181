@@ -420,6 +420,8 @@ int catalog_handle(eXosip_event_t *evtp)
     char *s;
     size_t len;
 
+    register_response(evtp, 200);
+    sleep(1);
     snprintf(rsp_xml_body, sizeof(rsp_xml_body), "<?xml version=\"1.0\"?>\r\n"
             "<Response>\r\n"
             "<CmdType>Catalog</CmdType>\r\n"
@@ -544,7 +546,21 @@ int sip_event_handle(eXosip_event_t *evtp)
             break;
         case EXOSIP_MESSAGE_REQUESTFAILURE:
             LOGI("EXOSIP_MESSAGE_REQUESTFAILURE");
-            dbg_dump_response(evtp);
+            LOGI("txt:%s", evtp->textinfo);
+            LOGI("tid:%d", evtp->tid);
+            if (evtp->ack) {
+                char *s;
+                size_t len;
+
+                LOGI("ack not null");
+                osip_message_to_str(evtp->ack, &s, &len);
+                printf("%s", s);
+            } else if (evtp->response) {
+                LOGI("respoonse not null");
+                dbg_dump_response(evtp);
+            } else if (evtp->request) {
+                LOGI("request not null");
+            }
             break;
         case EXOSIP_MESSAGE_ANSWERED:
             LOGI("EXOSIP_MESSAGE_ANSWERED");
