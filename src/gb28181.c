@@ -365,6 +365,8 @@ static int cmd_register()
     char from[1024] = {0};
     char contact[1024] = {0};
     char proxy[1024] = {0};
+    char *s;
+    size_t len;
 
 	if (app.registered){ // refresh register
 		ret = eXosip_register_build_register(app.ctx, app.regid, EXPIRY, &msg);
@@ -387,6 +389,8 @@ static int cmd_register()
         LOGE("send register error(%d)", ret);
 		return ret;
 	}
+    osip_message_to_str(msg, &s, &len);
+    LOGI("send register: \n%s", s);
 	return ret;
 }
 
