@@ -7,6 +7,17 @@
 
 ## 封包
 ![image](./images/协议.jpeg)
+- Request-Line: REGISTER sip:si服务器国标id@sip服务器ip：sip服务器端口 SIP/2.0
+- Via: SIP/2.0/(TCP or UDP) sip设备ip：sip设备端口;rport;branch=xxx
+- From: <sip:sip设备国标id@sip服务器域id>;tag=xxx
+- To: <sip:sip设备国标id@sip服务器域id>
+- Call-Id: xxx
+- CSeq: xxx REGISTER
+- Contact: <sip:sip设备国标id@sip设备ip：sip设备端口>
+- Max-Forwards: xxx
+- User-Agent: xxx
+- Expiers: xxx
+- Content-Length: 0
 
 ## 基本概念
 - uac
