@@ -366,15 +366,13 @@ static int cmd_register()
     char contact[1024] = {0};
     char proxy[1024] = {0};
 
-#if 0
-	if (app.regid > 0){ // refresh register
+	if (app.registered){ // refresh register
 		ret = eXosip_register_build_register(app.ctx, app.regid, EXPIRY, &msg);
 		if (!ret){
             LOGE("registe rrefresh build failed %d", ret);
 			return -1;
 		}
 	} else { // new register
-#endif
         sprintf(from, "sip:%s@%s:%d", app.user_id, app.server_ip, USER_PORT);
         sprintf(proxy, "sip:%s@%s:%d", app.sip_id, app.server_ip, PORT);
         sprintf(contact, "sip:%s@%s:%d", app.user_id, get_ip(), USER_PORT);
@@ -383,7 +381,7 @@ static int cmd_register()
             LOGE("register build failed %d", app.regid);
 			return -1;
 		}
-	//}
+    }
 	ret = eXosip_register_send_register(app.ctx, app.regid, msg);
 	if (ret){
         LOGE("send register error(%d)", ret);
@@ -420,6 +418,7 @@ int sip_event_handle(eXosip_event_t *evtp)
             cmd_register();
             break;
         case EXOSIP_REGISTRATION_SUCCESS:
+            app.registered = 1;
             dbg_dump_response(evtp);
             LOGI("EXOSIP_REGISTRATION_SUCCESS");
             break;
@@ -528,7 +527,6 @@ int main(int argc, char *argv[])
             if (!app.registered) {
                 LOGI("send register command to sip server");
                 cmd_register();
-                app.registered = 1;
             }
         }
         sleep(1);
