@@ -1,4 +1,5 @@
 #include <ifaddrs.h>
+#include <stdbool.h>
 #include "public.h"
 #include "osip2/osip_mt.h"
 #include "eXosip2/eXosip.h"
@@ -394,6 +395,105 @@ static int cmd_register()
 	return ret;
 }
 
+static int parse_xml( const char* data, const char* s_mark, bool with_s_make, const char* e_mark, bool with_e_make, char* dest)
+{
+	const char* satrt = strstr( data, s_mark );
+
+	if(satrt != NULL) {
+		const char* end = strstr(satrt, e_mark);
+
+		if(end != NULL){
+			int s_pos = with_s_make ? 0 : strlen(s_mark);
+			int e_pos = with_e_make ? strlen(e_mark) : 0;
+
+			strncpy( dest, satrt+s_pos, (end+e_pos) - (satrt+s_pos) );
+		}
+		return 0;
+	}
+	return -1;
+}
+
+int catalog_handle(eXosip_event_t *evtp)
+{
+    char rsp_xml_body[2048] = {0}, from[512] = {0}, to[512] = {0};
+    osip_message_t* rsp_msg = NULL;
+
+    snprintf(rsp_xml_body, sizeof(rsp_xml_body), "<?xml version=\"1.0\"?>\r\n"
+            "<Response>\r\n"
+            "<CmdType>Catalog</CmdType>\r\n"
+            "<SN>123456</SN>\r\n"
+            "<DeviceID>31010100992170000066</DeviceID>\r\n"
+            "<SumNum>1</SumNum>\r\n"
+            "<DeviceList Num=\"1\">\r\n"
+            "<Item>\r\n"
+            "<DeviceID>31010100992170000077</DeviceID>\r\n"
+            "<Name>simulate client</Name>\r\n"
+            "<Manufacturer>ZHD</Manufacturer>\r\n"
+            "<Model>28181</Model>\r\n"
+            "<Owner>Owner</Owner>\r\n"
+            "<CivilCode>CivilCode</CivilCode>\r\n"
+            "<Address>Address</Address>\r\n"
+            "<Parental>0</Parental>\r\n"
+            "<SafetyWay>0</SafetyWay>\r\n"
+            "<RegisterWay>1</RegisterWay>\r\n"
+            "<Secrecy>0</Secrecy>\r\n"
+            "<Status>ON</Status>\r\n"
+            "</Item>\r\n"
+            "<Item>\r\n"
+            "<DeviceID>31010100992170000088</DeviceID>\r\n"
+            "<Name>simulate client 2</Name>\r\n"
+            "<Manufacturer>ZHD</Manufacturer>\r\n"
+            "<Model>28181</Model>\r\n"
+            "<Owner>Owner</Owner>\r\n"
+            "<CivilCode>CivilCode</CivilCode>\r\n"
+            "<Address>Address</Address>\r\n"
+            "<Parental>0</Parental>\r\n"
+            "<SafetyWay>0</SafetyWay>\r\n"
+            "<RegisterWay>1</RegisterWay>\r\n"
+            "<Secrecy>0</Secrecy>\r\n"
+            "<Status>ON</Status>\r\n"
+            "</Item>\r\n"
+            "<Item>\r\n"
+            "<DeviceID>31010100992170000099</DeviceID>\r\n"
+            "<Name>simulate client 3</Name>\r\n"
+            "<Manufacturer>ZHD</Manufacturer>\r\n"
+            "<Model>28181</Model>\r\n"
+            "<Owner>Owner</Owner>\r\n"
+            "<CivilCode>CivilCode</CivilCode>\r\n"
+            "<Address>Address</Address>\r\n"
+            "<Parental>0</Parental>\r\n"
+            "<SafetyWay>0</SafetyWay>\r\n"
+            "<RegisterWay>1</RegisterWay>\r\n"
+            "<Secrecy>0</Secrecy>\r\n"
+            "<Status>ON</Status>\r\n"
+            "</Item>\r\n"
+            "</DeviceList>\r\n"
+            "</Response>\r\n");
+    sprintf(from, "sip:%s@%s:%d", app.user_id, app.server_ip, USER_PORT);
+    sprintf(to, "sip:%s@%s:%d", app.sip_id, app.server_ip, PORT);
+    eXosip_message_build_request(app.ctx, &rsp_msg, "MESSAGE", to, from, NULL);
+    osip_message_set_body(rsp_msg, rsp_xml_body, strlen(rsp_xml_body));
+    osip_message_set_content_type(rsp_msg, "Application/MANSCDP+xml");
+    eXosip_message_send_request(app.ctx, rsp_msg);	
+
+    return 0;
+}
+
+int message_handle(eXosip_event_t *evtp)
+{
+    osip_body_t* req_body = NULL;
+    char cmd[64] = {0};
+
+    osip_message_get_body(evtp->request, 0, &req_body);
+    parse_xml(req_body->body, "<CmdType>", false, "</CmdType>", false, cmd);
+    LOGI("got message: %s", cmd);
+    if (!strcmp(cmd, "Catalog")) {
+        catalog_handle(evtp);
+    }
+
+    return 0;
+}
+
 int sip_event_handle(eXosip_event_t *evtp)
 {
     switch(evtp->type) {
@@ -403,6 +503,9 @@ int sip_event_handle(eXosip_event_t *evtp)
             if (MSG_IS_REGISTER(evtp->request)) {
                 LOGI("get REGISTER");
                 register_handle(evtp);
+            } else if (MSG_IS_MESSAGE(evtp->request)) {
+                LOGI("got MESSAGE");
+                message_handle(evtp);
             }
             break;
         case EXOSIP_CALL_ANSWERED:
