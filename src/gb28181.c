@@ -419,6 +419,10 @@ int sip_event_handle(eXosip_event_t *evtp)
             }
             cmd_register();
             break;
+        case EXOSIP_REGISTRATION_SUCCESS:
+            dbg_dump_response(evtp);
+            LOGI("EXOSIP_REGISTRATION_SUCCESS");
+            break;
         default:
             LOGI("msg type: %d", evtp->type);
             break;
