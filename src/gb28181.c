@@ -409,8 +409,8 @@ int sip_event_handle(eXosip_event_t *evtp)
             }
             break;
         case EXOSIP_REGISTRATION_FAILURE:
-            dbg_dump_response(evtp);
             LOGI("EXOSIP_REGISTRATION_FAILURE");
+            dbg_dump_response(evtp);
             if (eXosip_add_authentication_info (app.ctx, app.user_id, app.user_id, PASSWD, NULL, NULL) < 0) {
                 LOGE("add authentication info error");
                 return -1;
@@ -419,8 +419,12 @@ int sip_event_handle(eXosip_event_t *evtp)
             break;
         case EXOSIP_REGISTRATION_SUCCESS:
             app.registered = 1;
-            dbg_dump_response(evtp);
             LOGI("EXOSIP_REGISTRATION_SUCCESS");
+            dbg_dump_response(evtp);
+            break;
+        case EXOSIP_CALL_INVITE:
+            LOGI("EXOSIP_CALL_INVITE");
+            dbg_dump_request(evtp);
             break;
         default:
             LOGI("msg type: %d", evtp->type);
