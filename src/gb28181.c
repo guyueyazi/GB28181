@@ -160,11 +160,9 @@ static void auth_calc_response(char *username, char *uri, char *method, HASHHEX 
     memcpy(response, rresponse, HASHHEXLEN);
 }
 
-static int cmd_ctalog()
+static int cmd_catalog(char* from, char* to, char *sip_id)
 {
     osip_message_t *msg;
-    char from[1024] = {0};
-    char to[1024] = {0};
     char body[1024] = {0};
     char *s;
     size_t len;
@@ -174,10 +172,8 @@ static int cmd_ctalog()
                   "<CmdType>Catalog</CmdType>\r\n"
                   "<SN>1</SN>\r\n"
                   "<DeviceID>%s</DeviceID>\r\n"
-                  "</Query>\r\n", app.user_id);
+                  "</Query>\r\n", sip_id);
 
-    sprintf(from, "sip:%s@%s:%d", app.sip_id, app.server_ip, USER_PORT);
-    sprintf(to, "sip:%s@%s:%d", app.user_id, app.user_ip, PORT);
     eXosip_message_build_request(app.ctx, &msg, "MESSAGE", to, from, NULL);
     osip_message_set_body(msg, body, strlen(body));
     osip_message_set_content_type(msg, "Application/MANSCDP+xml");
@@ -185,6 +181,26 @@ static int cmd_ctalog()
 
     osip_message_to_str(msg, &s, &len);
     LOGI("send cmd catalog: \n%s", s);
+}
+
+static int uas_cmd_catalog()
+{
+    char from[1024] = {0};
+    char to[1024] = {0};
+
+    sprintf(from, "sip:%s@%s:%d", app.sip_id, app.server_ip, USER_PORT);
+    sprintf(to, "sip:%s@%s:%d", app.user_id, app.user_ip, PORT);
+    cmd_catalog(from, to, app.user_id);
+}
+
+static int uac_cmd_catalog()
+{
+    char from[1024] = {0};
+    char to[1024] = {0};
+
+    sprintf(from, "sip:%s@%s:%d", app.user_id, get_ip(), USER_PORT);
+    sprintf(to, "sip:%s@%s:%d", app.sip_id, app.server_ip, PORT);
+    cmd_catalog(from, to, app.sip_id);
 }
 
 static int cmd_callstart()
@@ -449,49 +465,45 @@ int catalog_handle(eXosip_event_t *evtp)
 
     register_response(evtp, 200);
     sleep(1);
-    snprintf(rsp_xml_body, sizeof(rsp_xml_body), "<?xml version=\"1.0\"?>\r\n"
+    snprintf(rsp_xml_body, sizeof(rsp_xml_body), "<?xml version=\"1.0\" encoding=\"GB2312\"?>\r\n"
             "<Response>\r\n"
             "<CmdType>Catalog</CmdType>\r\n"
             "<SN>1</SN>\r\n"
             "<DeviceID>31010100992170000071</DeviceID>\r\n"
-            "<SumNum>2</SumNum>\r\n"
-            "<DeviceList Num=\"2\">\r\n"
+            "<SumNum>3</SumNum>\r\n"
+            "<DeviceList Num=\"3\">\r\n"
             "<Item>\r\n"
             "<DeviceID>34020000001320000001</DeviceID>\r\n"
-            "<Name>camera01</Name>\r\n"
+            "<Name>Camera 01</Name>\r\n"
             "<Manufacturer>Hikvision</Manufacturer>\r\n"
-            "<Model>Camera</Model>\r\n"
-            "<Owner>Hikvision</Owner>\r\n"
-            "<CivilCode>China</CivilCode>\r\n"
-            "<Address>100.100.84.94</Address>\r\n"
+            "<Model>IP Camera</Model>\r\n"
+            "<Owner>Owner</Owner>\r\n"
+            "<CivilCode>3101010099</CivilCode>\r\n"
+            "<Address>Address</Address>\r\n"
             "<Parental>0</Parental>\r\n"
-            "<ParentID>31010100992170000071</ParentID>\r\n"
+            "<ParentID>31010100992170000041</ParentID>\r\n"
             "<SafetyWay>0</SafetyWay>\r\n"
             "<RegisterWay>1</RegisterWay>\r\n"
             "<Secrecy>0</Secrecy>\r\n"
             "<Status>ON</Status>\r\n"
-            "<Longitude>0.000000</Longitude>\r\n"
-            "<Latitude>0.000000</Latitude>\r\n"
             "</Item>\r\n"
             "<Item>\r\n"
-            "<DeviceID>34020000001320000002</DeviceID>\r\n"
-            "<Name>camera01</Name>\r\n"
+            "<DeviceID>34020000001320000008</DeviceID>\r\n"
+            "<Name>Camera 02</Name>\r\n"
             "<Manufacturer>Hikvision</Manufacturer>\r\n"
-            "<Model>Camera</Model>\r\n"
-            "<Owner>Hikvision</Owner>\r\n"
-            "<CivilCode>China</CivilCode>\r\n"
-            "<Address>100.100.84.94</Address>\r\n"
+            "<Model>IP Camera</Model>\r\n"
+            "<Owner>Owner</Owner>\r\n"
+            "<CivilCode>3101010099</CivilCode>\r\n"
+            "<Address>Address</Address>\r\n"
             "<Parental>0</Parental>\r\n"
-            "<ParentID>31010100992170000071</ParentID>\r\n"
+            "<ParentID>31010100992170000041</ParentID>\r\n"
             "<SafetyWay>0</SafetyWay>\r\n"
             "<RegisterWay>1</RegisterWay>\r\n"
             "<Secrecy>0</Secrecy>\r\n"
             "<Status>ON</Status>\r\n"
-            "<Longitude>0.000000</Longitude>\r\n"
-            "<Latitude>0.000000</Latitude>\r\n"
             "</Item>\r\n"
             "</DeviceList>\r\n"
-            "</Response>\r\n");
+            "</Response\r\n>");
     sprintf(from, "sip:%s@%s:%d", app.user_id, app.server_ip, USER_PORT);
     sprintf(to, "sip:%s@%s:%d", app.sip_id, app.server_ip, PORT);
     eXosip_message_build_request(app.ctx, &rsp_msg, "MESSAGE", to, from, NULL);
@@ -622,8 +634,6 @@ static void * sip_eventloop_thread(void *arg)
     return NULL;
 }
 
-
-
 int sipserver_init()
 {
     app.ctx = eXosip_malloc();
@@ -650,8 +660,6 @@ err:
     
     return -1;
 }
-
-
 
 int parse_param(char *argv[])
 {
@@ -691,7 +699,7 @@ int main(int argc, char *argv[])
             static int done = 0;
 
             if (app.registered && !done) {
-                cmd_ctalog();
+                uas_cmd_catalog(app.user_id);
                 sleep(2);
                 cmd_callstart();
                 done = 1;
@@ -700,6 +708,8 @@ int main(int argc, char *argv[])
             if (!app.registered) {
                 LOGI("send register command to sip server");
                 cmd_register();
+                sleep(3);
+                uac_cmd_catalog();
             }
         }
         sleep(1);
@@ -708,3 +718,4 @@ int main(int argc, char *argv[])
 exit:
     return 0;
 }
+
