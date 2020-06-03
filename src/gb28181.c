@@ -227,7 +227,7 @@ int register_handle(eXosip_event_t *evtp)
     if (ss_dst) {
         osip_message_get_contact (evtp->request, 0, &contact);
         if (contact && contact->url) {
-            strdup(app.user_ip, contact->url->host);
+            app.user_ip = strdup(contact->url->host);
             app.user_port = atoi(contact->url->port);
         } else {
             LOGE("get contact error");
