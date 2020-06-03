@@ -654,7 +654,7 @@ int main(int argc, char *argv[])
     app.running = 1;
     app.server_ip = getenv("SIP_SERVER_IP");
     app.sip_id = getenv("SIP_SERVER_ID");
-    app.relm = getenv("SIP_SERVER_RELM");
+    app.relm = strndup(app.sip_id, 10);
     app.user_id = getenv("SIP_USER_ID");
     show_info();
     if (sipserver_init())
