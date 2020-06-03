@@ -177,7 +177,7 @@ static int cmd_ctalog()
                   "</Query>\r\n", app.user_id);
 
     sprintf(from, "sip:%s@%s:%d", app.sip_id, app.server_ip, USER_PORT);
-    sprintf(to, "sip:%s@%s:%d", app.user_id, app.server_ip, PORT);
+    sprintf(to, "sip:%s@%s:%d", app.user_id, app.user_ip, PORT);
     eXosip_message_build_request(app.ctx, &msg, "MESSAGE", to, from, NULL);
     osip_message_set_body(msg, body, strlen(body));
     osip_message_set_content_type(msg, "Application/MANSCDP+xml");
