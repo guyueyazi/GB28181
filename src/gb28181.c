@@ -309,7 +309,7 @@ void *media_thread(void *arg)
             LOGE("read error, %s", strerror(errno));
             goto exit;
         }
-        LOGI("size:%d", ret);
+        //LOGI("size:%d", ret);
         fwrite(buf, ret, 1, fp);
         fflush(fp);
     }
