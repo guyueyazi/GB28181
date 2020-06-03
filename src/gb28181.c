@@ -160,6 +160,33 @@ static void auth_calc_response(char *username, char *uri, char *method, HASHHEX 
     memcpy(response, rresponse, HASHHEXLEN);
 }
 
+static int cmd_ctalog()
+{
+    osip_message_t *msg;
+    char from[1024] = {0};
+    char to[1024] = {0};
+    char body[1024] = {0};
+    char *s;
+    size_t len;
+
+    sprintf(body, "<?xml version=\"1.0\"?>\r\n"
+                  "<Query>\r\n"
+                  "<CmdType>Catalog</CmdType>\r\n"
+                  "<SN>1</SN>\r\n"
+                  "<DeviceID>%s</DeviceID>\r\n"
+                  "</Query>\r\n", app.user_id);
+
+    sprintf(from, "sip:%s@%s:%d", app.sip_id, app.server_ip, USER_PORT);
+    sprintf(to, "sip:%s@%s:%d", app.user_id, app.server_ip, PORT);
+    eXosip_message_build_request(app.ctx, &msg, "MESSAGE", to, from, NULL);
+    osip_message_set_body(msg, body, strlen(body));
+    osip_message_set_content_type(msg, "Application/MANSCDP+xml");
+    eXosip_message_send_request(app.ctx, msg);	
+
+    osip_message_to_str(msg, &s, &len);
+    LOGI("send cmd catalog: \n%s", s);
+}
+
 static int cmd_callstart()
 {
 	int ret = -1;
@@ -664,6 +691,8 @@ int main(int argc, char *argv[])
             static int done = 0;
 
             if (app.registered && !done) {
+                cmd_ctalog();
+                sleep(2);
                 cmd_callstart();
                 done = 1;
             }
