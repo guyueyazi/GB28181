@@ -1,0 +1,35 @@
+MESSAGE sip:31010100992170000041@3101010099 SIP/2.0
+Via: SIP/2.0/UDP 100.100.72.64:5060;rport=5060;branch=z9hG4bK695192852
+From: <sip:31010100992170000044@3101010099>;tag=1859907535
+To: <sip:31010100992170000041@3101010099>
+Call-ID: 2001429086
+CSeq: 20 MESSAGE
+Content-Type: Application/MANSCDP+xml
+Max-forwards: 70
+User-agent: IP Camera
+Content-Length:   583
+
+<?xml version="1.0" encoding="GB2312"?>
+<Response>
+<CmdType>Catalog</CmdType>
+<SN>1</SN>
+<DeviceID>31010100992170000044</DeviceID>
+<SumNum>1</SumNum>
+<DeviceList Num="1">
+<Item>
+<DeviceID>34020000001320000001</DeviceID>
+<Name>Camera 01</Name>
+<Manufacturer>Hikvision</Manufacturer>
+<Model>IP Camera</Model>
+<Owner>Owner</Owner>
+<CivilCode>3101010099</CivilCode>
+<Address>Address</Address>
+<Parental>0</Parental>
+<ParentID>31010100992170000041</ParentID>
+<SafetyWay>0</SafetyWay>
+<RegisterWay>1</RegisterWay>
+<Secrecy>0</Secrecy>
+<Status>ON</Status>
+</Item>
+</DeviceList>
+</Response>
