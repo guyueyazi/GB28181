@@ -3,6 +3,23 @@
 - 不同平台互通(厂商都自定义取流协议)  
 比如以前的摄像头都是零散的，每个公安局只能看到自己小范围的监控录像，发生了重大案件，还需要把硬盘监控资料交到上级部门，上级部门再组织大量人员人工回放查看，这样太影响效率了！
 
+## 组成
+### SIP信令
+#### RFC 3261
+- REGISTER
+- INVITE
+#### RFC 3428
+- MESSAGE
+- MANSCDP+xml
+#### RFC 2976
+- INFO
+- MANSRTSP
+#### RFC 3265
+- SUBSCRIBE
+- NOTIFY
+### 流媒体
+- RTP + PS/H264
+
 ## 建立媒体流流程
 ![image](./images/sip基本网络模型.png)
 
@@ -24,17 +41,27 @@
 ## 基本概念
 - uac
 - uas
+    逻辑概念，代表sip信令的发起方和服务方,可能是两个独立的实体，也可能在一个主机上
 - Redirect Server
+    重定向服务器，用于查找sip代理服务器
 - Registrar
-- session
-- dialog
-- transaction
+   位置服务器，记录设备的ip和设备id的对应关系
 
 ## 我们要做的
 ![image](./images//ali-gb28181.png)
-
-- 级联
-
+- sip信令服务器
+    - register
+    - invite
+    - message
+        - catalog
+        - keepalive
+        - alarm
+        - 云台控制
+    - subscribe
+        - 订阅camera经纬度
+- 流媒体服务
+    - RTP+PS解析，转换http-flv、rtmp、hls
+- NVR or 国标级联
 
 ## 开源软件
 - eXosip & osip
