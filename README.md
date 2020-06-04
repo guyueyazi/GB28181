@@ -20,6 +20,9 @@
 ### 流媒体
 - RTP + PS/H264
 
+## 注册流程
+![image](./images/register.png)
+
 ## 建立媒体流流程
 ![image](./images/sip基本网络模型.png)
 
