@@ -43,11 +43,11 @@
 
 ## 基本概念
 - uac
-- uas
+- uas  
     逻辑概念，代表sip信令的发起方和服务方,可能是两个独立的实体，也可能在一个主机上
-- Redirect Server
+- Redirect Server  
     重定向服务器，用于查找sip代理服务器
-- Registrar
+- Registrar  
    位置服务器，记录设备的ip和设备id的对应关系
 
 ## 我们要做的
