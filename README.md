@@ -24,7 +24,9 @@
 ![image](./images/register.png)
 
 ## 建立媒体流流程
+### 基本流程
 ![image](./images/sip基本网络模型.png)
+### 信令交互
 ![image](./images/invite.png)
 
 ## 封包
