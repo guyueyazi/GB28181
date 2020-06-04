@@ -17,6 +17,8 @@
 #### RFC 3265
 - SUBSCRIBE
 - NOTIFY
+#### RFC 4566
+- SDP
 ### 流媒体
 - RTP + PS/H264
 
