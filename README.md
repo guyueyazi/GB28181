@@ -25,6 +25,7 @@
 
 ## 建立媒体流流程
 ![image](./images/sip基本网络模型.png)
+![image](./images/invite.png)
 
 ## 封包
 ![image](./images/协议.jpeg)
