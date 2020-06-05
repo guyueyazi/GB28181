@@ -63,6 +63,7 @@
 
 ## 我们要做的
 ![image](./images//ali-gb28181.png)
+- 和实际gb28181的区别：c/s p2p
 - sip信令服务器
     - register
     - invite
