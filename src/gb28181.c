@@ -273,6 +273,7 @@ int register_handle(eXosip_event_t *evtp)
         if (contact && contact->url) {
             app.user_ip = strdup(contact->url->host);
             app.user_port = atoi(contact->url->port);
+            LOGI("user_ip:%s", app.user_ip);
         } else {
             LOGE("get contact error");
         }
@@ -711,7 +712,7 @@ int main(int argc, char *argv[])
             static int done = 0;
 
             if (app.registered && !done) {
-                uas_cmd_catalog(app.user_id);
+                //uas_cmd_catalog(app.user_id);
                 sleep(2);
                 cmd_callstart();
                 done = 1;
