@@ -125,6 +125,22 @@ static void register_response(eXosip_event_t *evtp, int code)
     }
 }
 
+static void response200(eXosip_event_t *evtp)
+{
+    int ret = 0 ;
+    osip_message_t * msg = NULL;
+
+    ret = eXosip_message_build_answer (app.ctx, evtp->tid, 200, &msg);
+    if (!ret && msg) {
+        eXosip_lock(app.ctx);
+        LOGI("send response answer");
+        eXosip_message_send_answer (app.ctx, evtp->tid, 200, msg);
+        eXosip_unlock(app.ctx);
+    } else {
+        LOGE("build answer error(%d)", ret);
+    }
+}
+
 static void register_401unauthorized_response(eXosip_event_t *evtp)
 {
     int ret = 0;
@@ -527,9 +543,10 @@ int message_handle(eXosip_event_t *evtp)
     if (!strcmp(cmd, "Catalog")) {
         LOGI("got message: %s", cmd);
         dbg_dump_request(evtp);
-        dbg_dump_response(evtp);
-        exit(0);
-        catalog_handle(evtp);
+        if (app.mode == MODE_CLIENT)
+            catalog_handle(evtp);
+        else
+            response200(evtp);
     } else if (!strcmp(cmd, "Keepalive")) {
         LOGI("got message: %s", cmd);
     } else {
