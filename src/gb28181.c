@@ -464,8 +464,6 @@ int catalog_handle(eXosip_event_t *evtp)
     char *s;
     size_t len;
 
-    register_response(evtp, 200);
-    sleep(1);
     snprintf(rsp_xml_body, sizeof(rsp_xml_body), "<?xml version=\"1.0\" encoding=\"GB2312\"?>\r\n"
             "<Response>\r\n"
             "<CmdType>Catalog</CmdType>\r\n"
@@ -716,6 +714,8 @@ int main(int argc, char *argv[])
                 sleep(2);
                 cmd_callstart();
                 done = 1;
+            } else {
+                LOGI("call done");
             }
         } else {
             if (!app.registered) {
