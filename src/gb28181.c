@@ -528,6 +528,7 @@ int message_handle(eXosip_event_t *evtp)
         //dbg_dump_request(evtp);
         catalog_handle(evtp);
     } else if (!strcmp(cmd, "Keepalive")) {
+        LOGI("got message: %s", cmd);
     } else {
         LOGI("got message: %s", cmd);
     }
