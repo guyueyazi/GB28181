@@ -715,7 +715,6 @@ int main(int argc, char *argv[])
                 cmd_callstart();
                 done = 1;
             } else {
-                LOGI("call done");
             }
         } else {
             if (!app.registered) {
