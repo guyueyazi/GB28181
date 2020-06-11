@@ -526,8 +526,8 @@ int message_handle(eXosip_event_t *evtp)
     osip_message_get_body(evtp->request, 0, &req_body);
     parse_xml(req_body->body, "<CmdType>", false, "</CmdType>", false, cmd);
     if (!strcmp(cmd, "Catalog")) {
-        LOGI("got message: %s", cmd);
-        dbg_dump_request(evtp);
+        LOGI("got response message: %s", cmd);
+        //dbg_dump_request(evtp);
         catalog_handle(evtp);
     } else if (!strcmp(cmd, "Keepalive")) {
     } else {
