@@ -512,7 +512,7 @@ int catalog_handle(eXosip_event_t *evtp)
     eXosip_message_send_request(app.ctx, rsp_msg);	
 
     osip_message_to_str(rsp_msg, &s, &len);
-    LOGI("send catalog: \n%s", s);
+    //LOGI("response catalog to %s: \n%s", from, s);
 
     return 0;
 }
