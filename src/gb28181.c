@@ -712,7 +712,7 @@ int main(int argc, char *argv[])
             static int done = 0;
 
             if (app.registered && !done) {
-                //uas_cmd_catalog(app.user_id);
+                uas_cmd_catalog(app.user_id);
                 sleep(2);
                 cmd_callstart();
                 done = 1;
