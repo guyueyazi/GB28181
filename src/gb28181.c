@@ -733,7 +733,7 @@ int main(int argc, char *argv[])
             if (app.registered && !done) {
                 uas_cmd_catalog(app.user_id);
                 sleep(2);
-                cmd_callstart();
+//                cmd_callstart();
                 done = 1;
             } else {
             }
