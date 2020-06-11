@@ -524,8 +524,8 @@ int message_handle(eXosip_event_t *evtp)
     osip_message_get_body(evtp->request, 0, &req_body);
     parse_xml(req_body->body, "<CmdType>", false, "</CmdType>", false, cmd);
     if (!strcmp(cmd, "Catalog")) {
-        LOGI("got response message: %s", cmd);
-        //dbg_dump_request(evtp);
+        LOGI("got message: %s", cmd);
+        dbg_dump_request(evtp);
         catalog_handle(evtp);
     } else if (!strcmp(cmd, "Keepalive")) {
         LOGI("got message: %s", cmd);
@@ -634,7 +634,7 @@ static void * sip_eventloop_thread(void *arg)
     return NULL;
 }
 
-int sipserver_init()
+int sip_init()
 {
     app.ctx = eXosip_malloc();
     if (!app.ctx) {
@@ -704,7 +704,7 @@ int main(int argc, char *argv[])
         goto exit;
     }
     show_info();
-    if (sipserver_init())
+    if (sip_init())
         goto exit;
     while(app.running)  {
         if (app.mode == MODE_SERVER) {
