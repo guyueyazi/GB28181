@@ -180,7 +180,7 @@ static int cmd_catalog(char* from, char* to, char *sip_id)
     eXosip_message_send_request(app.ctx, msg);	
 
     osip_message_to_str(msg, &s, &len);
-    LOGI("send cmd catalog: \n%s", s);
+    //LOGI("send cmd catalog: \n%s", s);
 }
 
 static int uas_cmd_catalog()
@@ -190,6 +190,7 @@ static int uas_cmd_catalog()
 
     sprintf(from, "sip:%s@%s:%d", app.sip_id, app.server_ip, USER_PORT);
     sprintf(to, "sip:%s@%s:%d", app.user_id, app.user_ip, PORT);
+    LOGI("send catalog to %s", to);
     cmd_catalog(from, to, app.user_id);
 }
 
