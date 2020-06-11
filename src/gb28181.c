@@ -562,7 +562,7 @@ int sip_event_handle(eXosip_event_t *evtp)
         case EXOSIP_MESSAGE_NEW:
             //LOGI("EXOSIP_MESSAGE_NEW");
             if (MSG_IS_REGISTER(evtp->request)) {
-                LOGI("get REGISTER");
+                LOGI("got REGISTER");
                 register_handle(evtp);
             } else if (MSG_IS_MESSAGE(evtp->request)) {
                 message_handle(evtp);
