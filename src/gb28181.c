@@ -690,18 +690,18 @@ int main(int argc, char *argv[])
     app.server_ip = getenv("SIP_SERVER_IP");
     if (!app.server_ip) {
         LOGI("SIP_SERVER_IP not found");
-        goto ext;
+        goto exit;
     }
     app.sip_id = getenv("SIP_SERVER_ID");
     if (!app.sip_id) {
         LOGI("SIP_SERVER_ID not found");
-        goto ext;
+        goto exit;
     }
     app.relm = strndup(app.sip_id, 10);
     app.user_id = getenv("SIP_USER_ID");
     if (!app.user_id) {
         LOGI("SIP_USER_ID not found");
-        goto ext;
+        goto exit;
     }
     show_info();
     if (sipserver_init())
